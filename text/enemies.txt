@@ -1,0 +1,16 @@
+#ID|Name|H or R or Z|Threat|desc|hp|ep|df|atk|lk|xp|Items...
+001|M0U53|Z|1|yuh wassup its just a mouse|8~12|9~11|0~2|2~5|3~5|3~5|
+002|BR0K3N_DR01D|R|1|busted ass droid|8~12|9~11|0~2|2~5|3~5|3~5|
+003|Street Thug|H|1|low level noob|8~12|9~11|0~2|2~5|3~5|3~5|
+004|B0MB4BUG|Z|2|suicide bomb bug|8~12|9~11|0~2|2~5|3~5|3~5|
+005|DR0N3|R|2|it says dji on it|8~12|9~11|0~2|2~5|3~5|3~5|
+006|Scrapper Brute|H|2|steel armour|8~12|9~11|0~2|2~5|3~5|3~5|
+007|Scrapper Blaster|H|2|steel rifle|8~12|9~11|0~2|2~5|3~5|3~5|
+008|Scrapper Addict|H|2|steel addicted|8~12|9~11|0~2|2~5|3~5|3~5|
+009|B4RT3ND3R|R|2|
+010|5PYD3R|Z|3|
+011|Zapper|H|3|
+012|Ah Beng|H|3|
+013|R1V3RB04T_CR1TT3R|Z|1|
+014|Riverboat Gambler|H|3|
+015|Riverboat Gunslinger|H|3|

@@ -1,0 +1,3 @@
+||"Ring... Ring... Ring..."
+|You|"Ugh... I swear I just had the weirdest dream..."
+|You|"...whatever, no time to think about that, I should get to work."
