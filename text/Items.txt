@@ -1,0 +1,8 @@
+#ID|Name|Effects...
+I01|Spare R.A.M.|heal,10
+I02|Volume Slider|heal,10|df,False,2
+I03|R.A.M. Sandwich|heal,25
+I04|USB Port-obello Burger|HOT,15,4
+I05|Button Battery|recharge,10
+I06|Lithium-ion Battery|recharge,30
+I07|Holo Rab_bit's Foot|lk,False,5
