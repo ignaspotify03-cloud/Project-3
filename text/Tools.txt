@@ -15,4 +15,9 @@ T10|Electric Taser|2|1|elecdamage,atk/2,100
 T11|Zap|2|1|elecdamage,atk,100
 T12|Poker Chip|1|1|cd,4,100
 T13|Lucky Coin|1|1|lk,2,lk,allies|damage,7,7,self
-T14|Riverboat Six-shooter|2|1|damage,atk*3,lk|
+T14|Riverboat Six-shooter|2|1|damage,atk*3,lk
+T15|Makeshift Generator|5|1|recharge,7,100,afterbattle
+T16|Wooden Whistle|3|0|flee,Z,lk|None,0,5
+T17|Steel Whistle|5|0|flee,Z,lk|summon,Z,1
+T18|Lead Whistle|7|0|flee,Z,lk,loot|None,0,10
+T19|Repellent Whistle|7|0|flee,Z,100,enemies
