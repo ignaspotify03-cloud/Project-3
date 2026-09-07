@@ -2,6 +2,24 @@ import pygame, sys
 from random import random, randint, choices
 import models
 
+effects_dict = {
+    "heal":models.HEAL,
+    "recharge":models.RECHARGE,
+    "HOT":models.HEALOVERTIME,
+    "ROT":models.RECHARGEOVERTIME,
+    "damage":models.DAMAGE,
+    "elecdamage":models.ELECDAMAGE,
+    "poison":models.POISON,
+    "flee":models.FLEE,
+    "summon":models.SUMMON,
+    "self":models.SELF,
+    "field":models.FIELD,
+    "enemies":models.ENEMIES,
+    "delay1":models.DELAY1,
+    "ondeath":models.ONDEATH,
+    "afterbattle":models.AFTERBATTLE
+}
+
 colours = {
     'RED':(255,0,0),
     'YELLOW':(255,255,0),
@@ -10,6 +28,44 @@ colours = {
     'BLUE':(0,0,255),
     'PURPLE':(255,0,255)
 }
+
+def GetItem(itemID):
+    if itemID[0] == 'I':
+        with open("text\items.txt", 'r') as file:
+            for item in file:
+                item = item.strip().split('|')
+                if item[0] == itemID:
+                    effects = []
+                    for effect in item[2:]:
+                        effect = effect.split(',')
+                        new_effect = []
+                        for x in effect:
+                            if x in effects_dict.keys():
+                                new_effect.append(effects_dict[x])
+                            else:
+                                new_effect.append(x)
+                        effects.append(new_effect)
+                    return models.Item(Name = item[1], effects = effects)
+                    
+
+    elif itemID[0] == 'T':
+        with open(r"text\tools.txt", 'r') as file:
+            for tool in file:
+                tool = tool.strip().split('|')
+                if tool[0] == itemID:
+                    effects = []
+                    for effect in tool[4:]:
+                        effect = effect.split(',')
+                        new_effect = []
+                        for x in effect:
+                            if x in effects_dict.keys():
+                                new_effect.append(effects_dict[x])
+                            else:
+                                new_effect.append(x)
+                        effects.append(new_effect)
+                    return models.Tool(Name = tool[1], cost = int(tool[2]), cooldown = int(tool[3]), effects = effects)
+    else:
+        return None
 
 def GetThreat(enemyID):
     with open("text\enemies.txt", 'r') as file:
@@ -25,24 +81,45 @@ def GetEnemy(enemyID):
         for enemy in file:
             if enemy[0] == '#':
                 continue
-            enemy = enemy.strip().split('|')
+            enemy, lootpool = enemy.strip().split('$')
+            enemy = enemy.split('|')
             if enemy[0] == enemyID:
-                Name, desc = enemy[1], enemy[4]
+                Name, desc, species = enemy[1].strip(), enemy[10], enemy[2]
                 stats = []
-                for i in range(5,11):
+                for i in range(4,10):
                     if '~' in enemy[i]:
                         lo, hi = enemy[i].split('~')
                         stats.append(randint(int(lo), int(hi)))
                     else:
                         stats.append(int(enemy[i]))
 
-                loot = enemy[11:]
-                loot = [thing for thing in loot if thing != ""]
+                if len(enemy) > 11:
+                    items = []
+                    for thing in enemy[11:]:
+                        if thing:
+                            itemID, probability = thing.split(',')
+                            if randint(1,100) <= int(probability):
+                                items.append(GetItem(itemID))
+                        
 
-                SRAM = models.Item(Name = "Spare R.A.M.", effects = [["hp", False, 10, "hp_max"]], useText = "ate the spare R.A.M")
-                loot = [SRAM]
+                lootpool = lootpool.split('|')
+                loot = []
+                for thing in lootpool:
+                    itemID, probability = thing.split(',')
+                    if randint(1,100) <= int(probability):
+                        loot.append(GetItem(itemID))
 
-                return models.Enemy(Name = Name, hp = stats[0], ep = stats[1], df = stats[2], atk = stats[3], lk = stats[4], desc = desc, xp = stats[5], loot = loot)
+                Enemy = models.Enemy(Name = Name, hp = stats[0], ep = stats[1], df = stats[2], atk = stats[3], lk = stats[4], desc = desc, xp = stats[5], loot = loot, species = species)
+
+                for item in items:
+                    if item.type == models.ITEM:
+                        Enemy.GainItem(item)
+                    elif item.type == models.TOOL:
+                        Enemy.GainTool(item)
+
+                return Enemy
+
+
                 
 
 def SetUpBattle(eventName, threat):
@@ -206,14 +283,18 @@ def StartBattle(scene, player, enemies):
                             next_enemy = enemy[2]
                             break
 
-                    hasCrit, rawDamage = next_enemy.DealDamage()
-                    announcements.append(f"{next_enemy.Name} attacks for {rawDamage} damage.{' Critical Hit!' if hasCrit else ''}")
-                    recv_damage = player.RecvDamage(rawDamage)
-                    if recv_damage == False:
-                        announcements.append(f"You dodged the attack!")
-                    else:
-                        announcements.append(f"You took {recv_damage} damage from {next_enemy.Name}.")
-                            
+                    output = next_enemy.DoTurn(player)
+                    if type(output[-1]) == type(""):
+                        announcements.extend(output[-1].strip().split('\n'))
+                    if type(output[0]) == type((0,0)):
+                        hasCrit, rawDamage = output[0]
+                        announcements.append(f"{next_enemy.Name} attacks for {rawDamage} damage.{' Critical Hit!' if hasCrit else ''}")
+                        recv_damage = player.RecvDamage(rawDamage)
+                        if recv_damage == False:
+                            announcements.append(f"You dodged the attack!")
+                        else:
+                            announcements.append(f"You took {recv_damage} damage from {next_enemy.Name}.")
+                        
                     if turnOrder[0] == -1:
                         battleMode = 0
                         player.GameTick()
@@ -276,7 +357,7 @@ def StartBattle(scene, player, enemies):
             text_surf.blit(text_render, (10, 10))
             tools = player.GetTools()
             for i in range(len(tools)):
-                text_render = font.render(f"{tools[i][0]:<20}Cost:{str(tools[i][1])+'EP':<5}{f'Charge:{tools[i][2]}/{tools[i][3]}' if tools[i][3] != -1 else '':<15}{'READY   ' if tools[i][4] else 'COOLDOWN'}  {tools[i][5]}", True, (255,255,255) if i != (selectedItem-1) else (255,220,100))
+                text_render = font.render(f"{tools[i][0]:<20}Cost:{str(tools[i][1])+'EP':<5}{'READY   ' if tools[i][2] else 'COOLDOWN'}  {tools[i][3]}", True, (255,255,255) if i != (selectedItem-1) else (255,220,100))
                 text_surf.blit(text_render, (12, 40+(25*i)))
         else:
             for i in range(1,10):

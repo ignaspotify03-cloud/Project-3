@@ -71,15 +71,14 @@ if isPlaying:
     dialogue.dispStory('text\story\intro.txt')
     
     Player = models.Player(Name = "Player", hp = 20, ep = 10, df = 2, atk = 5, lk = 5)
-    Ramburger = models.Item(Name = "R.A.M.Burger", effects = [["hp", False, 20, "hp_max"]], useText = "ate the R.A.M.Burger")
-    Player.GainItem(Ramburger, 5)
+    Player.GainItem(battle.GetItem("I02"), 5)
+    Player.GainItem(battle.GetItem("I05"), 5)
 
-    Rock = models.Tool(Name = "Rocks", cost = 2, effects = [[models.DAMAGE, 5]], desc = "Does 5 damage")
-    DEVSTICK = models.Tool(Name = "DEVSTICK", cost = 0, effects = [[models.ELEC_DAMAGE, 99]], desc = "Does 99 electrical damage")
-    Player.GainTool(Rock)
-    Player.GainTool(DEVSTICK)
+    Player.GainTool(battle.GetItem("T01"))
+    Player.GainTool(battle.GetItem("T04"))
+    Player.GainTool(battle.GetItem("T13"))
 
     img, colour, enemies = battle.SetUpBattle("Street", 7)       
-    battle.StartBattle("Street", Player, enemies)
+    battle.StartBattle("Test", Player, enemies)
 
 sys.exit()
