@@ -67,6 +67,8 @@ def dispStory(story_path):
         story = file.readlines()
 
     start_time = pygame.time.get_ticks()
+    output = []
+    speaker_img = None
     isRunning = True
     while isRunning:
         for event in pygame.event.get():
@@ -117,14 +119,23 @@ def dispStory(story_path):
                 else:
                     while len(story) != 0 and story[0][0] != '?': #ignores text until it reaches another ?
                         story.pop(0)
+            elif story[0][0] == '>':
+                commands = story[0].strip().strip('>').split('>')
+                for command in commands:
+                    mode, value = command.split('|')
+                    output.append([mode,value])
+                isRunning = False
             else:
                 options_available = []
                 elapsed_timems = pygame.time.get_ticks() - start_time
                 text_progress = min(1, elapsed_timems/1000*SCROLLSPEED)
                 img, header, text = story[0].strip().split('|')
                 if img:
-                    speaker_img = pygame.image.load(img).convert_alpha()
-                    speaker_img = pygame.transform.scale(speaker_img, speaker_rect.size)
+                    if img.strip() == "None":
+                        speaker_img = None
+                    else:
+                        speaker_img = pygame.image.load(img).convert_alpha()
+                        speaker_img = pygame.transform.scale(speaker_img, speaker_rect.size)
 
             header_render = header_font.render(header, True, (255, 220, 100))
             text_render = font.render(text[:int(len(text)*text_progress)], True, (255, 255, 255))
@@ -135,7 +146,8 @@ def dispStory(story_path):
             text_surf.blit(text_render, (20, 55))
         
         screen.fill((64, 64, 64))
-        screen.blit(speaker_img, speaker_rect) 
+        if speaker_img:
+            screen.blit(speaker_img, speaker_rect) 
         screen.blit(text_surf, (WIDTH*0.05, HEIGHT*0.65))
 
         if options_available:
@@ -144,5 +156,5 @@ def dispStory(story_path):
 
         pygame.display.flip()
         clock.tick(FPS)
-
     pygame.quit()
+    return output

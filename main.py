@@ -3,6 +3,7 @@ from random import random
 import battle
 import models
 import dialogue
+import puzzlebox
 
 #initialise pygame
 pygame.init()
@@ -66,19 +67,32 @@ while isMenu:
 
 pygame.quit()
 
+commands = [['D', 'intro.txt']]
+threat = 13
+
 #game loop
-if isPlaying:
-    dialogue.dispStory('text/story/intro.txt')
-    
-    Player = models.Player(Name = "Player", hp = 20, ep = 10, df = 2, atk = 5, lk = 5)
-    Player.GainItem(battle.GetItem("I02"), 5)
-    Player.GainItem(battle.GetItem("I05"), 5)
+Player = models.Player(Name = "Player", hp = 20, ep = 10, df = 2, atk = 5, lk = 5)
+Player.GainItem(battle.GetItem("I02"), 5)
+Player.GainItem(battle.GetItem("I05"), 5)
 
-    Player.GainTool(battle.GetItem("T01"))
-    Player.GainTool(battle.GetItem("T04"))
-    Player.GainTool(battle.GetItem("T13"))
+Player.GainTool(battle.GetItem("T01"))
+Player.GainTool(battle.GetItem("T04"))
+Player.GainTool(battle.GetItem("T13"))
 
-    Name, colour, img, desc, enemies = battle.SetUpBattle("S03", 13)       
-    battle.StartBattle(Name, img, colour, Player, enemies)
+while isPlaying:
+    if len(commands) == 0:
+        print("commands empty")
+        isPlaying = False
+    next_command = commands.pop(0)
+    if next_command[0] == 'D':
+        commands.extend(dialogue.dispStory('text/story/' + next_command[1]))
+    elif next_command[0] == 'B':
+        Name, colour, img, desc, enemies = battle.SetUpBattle(next_command[1], threat)       
+        battle.StartBattle(Name, img, colour, Player, enemies)
+    elif next_command[0] == 'M':
+        puzzlebox.puzzlebox()
+    else:
+        print("Invalid command")
+        isPlaying = False
 
 sys.exit()
