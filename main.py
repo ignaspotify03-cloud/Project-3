@@ -68,7 +68,7 @@ pygame.quit()
 
 #game loop
 if isPlaying:
-    dialogue.dispStory('text\story\intro.txt')
+    dialogue.dispStory('text/story/intro.txt')
     
     Player = models.Player(Name = "Player", hp = 20, ep = 10, df = 2, atk = 5, lk = 5)
     Player.GainItem(battle.GetItem("I02"), 5)

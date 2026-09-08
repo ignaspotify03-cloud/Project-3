@@ -31,7 +31,7 @@ colours = {
 
 def GetItem(itemID):
     if itemID[0] == 'I':
-        with open("text\items.txt", 'r') as file:
+        with open("text/items.txt", 'r') as file:
             for item in file:
                 item = item.strip().split('|')
                 if item[0] == itemID:
@@ -49,7 +49,7 @@ def GetItem(itemID):
                     
 
     elif itemID[0] == 'T':
-        with open(r"text\tools.txt", 'r') as file:
+        with open("text/tools.txt", 'r') as file:
             for tool in file:
                 tool = tool.strip().split('|')
                 if tool[0] == itemID:
@@ -68,7 +68,7 @@ def GetItem(itemID):
         return None
 
 def GetThreat(enemyID):
-    with open("text\enemies.txt", 'r') as file:
+    with open("text/enemies.txt", 'r') as file:
         for enemy in file:
             if enemy[0] == '#':
                 continue
@@ -77,7 +77,7 @@ def GetThreat(enemyID):
                 return int(enemy[3])
 
 def GetEnemy(enemyID):
-    with open("text\enemies.txt", 'r') as file:
+    with open("text/enemies.txt", 'r') as file:
         for enemy in file:
             if enemy[0] == '#':
                 continue
@@ -124,7 +124,7 @@ def GetEnemy(enemyID):
 
 def SetUpBattle(eventName, threat):
     '''returns img, rgb colour, list of enemy objects'''
-    with open("text\scenes.txt", 'r') as file:
+    with open("text/scenes.txt", 'r') as file:
         for scene in file:
             scene = scene.strip().split('|')
             if scene[0].lower() == eventName.lower():
