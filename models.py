@@ -118,7 +118,6 @@ class Tool():
             target = user
 
         #if magnifier uses stats, adjust value
-        print(f">>{effect[1]} and user is {user.Name}")
         if type(effect[1]) == type(1):
             pass
         elif effect[1].isnumeric():
@@ -157,7 +156,6 @@ class Tool():
                 else:
                     output += (f"{target.Name} took {recv_damage} damage.")
             elif effect[0] == ELECDAMAGE:
-                print(effect[1])
                 output += (f"{target.Name} took {target.RecvElecDamage(effect[1])} electrical damage.")
             elif effect[0] == FLEE:
                 pass
@@ -239,7 +237,6 @@ class Entity():
     def RecvElecDamage(self, damage=0):
         '''Change entity's hp by damage, affected by defence, but not dodge chance
         Returns true damage dealt'''
-        print(damage)
         true_damage = max(damage-self.df-self.df_tmp, 0)
         self.hp -= true_damage
         return true_damage
@@ -338,8 +335,7 @@ class Enemy(Entity):
                 self.UseTool(tool.Name)
                 output += tool.UseTool(self, player)
             return [self.DealDamage(), output]
-            
-            
+        
     
     def dropLoot(self):
         '''Returns dropped XP and loot'''
