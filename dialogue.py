@@ -25,6 +25,7 @@ def dispStory(story_path):
     WIDTH, HEIGHT = 1440, 810
     FPS, SCROLLSPEED = 60, 5
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Project 3")
     clock = pygame.time.Clock()
 
     font = pygame.font.SysFont("Courier New", 24, bold = True)
@@ -34,6 +35,9 @@ def dispStory(story_path):
     box_width, box_height = int(WIDTH*0.9), int(HEIGHT*0.3)
     text_surf = pygame.Surface((box_width, box_height), pygame.SRCALPHA) #SRCALPHA enables per-pixel alpha, allowing each pixel to have its own alpha value
     text_surf.fill((0,0,0,200))
+
+    #speaker img setup
+    speaker_rect = pygame.Rect(WIDTH*0.1, HEIGHT*0.15, HEIGHT*0.5, HEIGHT*0.5) 
 
     #options setup
     option_width, option_height = int(WIDTH*0.3), int(HEIGHT*0.3)
@@ -82,7 +86,7 @@ def dispStory(story_path):
                         story.pop(0)
                         start_time = pygame.time.get_ticks()
                 while len(story) != 0 and story[0][0] == '#': #skip comments
-                    print(f"popped: {story.pop(0)}")
+                    story.pop(0)
 
         #display text
         if len(story) == 0:
@@ -112,15 +116,15 @@ def dispStory(story_path):
                     continue
                 else:
                     while len(story) != 0 and story[0][0] != '?': #ignores text until it reaches another ?
-                        print(story.pop(0))
+                        story.pop(0)
             else:
                 options_available = []
                 elapsed_timems = pygame.time.get_ticks() - start_time
                 text_progress = min(1, elapsed_timems/1000*SCROLLSPEED)
                 img, header, text = story[0].strip().split('|')
                 if img:
-                    #change person talking on screen
-                    pass
+                    speaker_img = pygame.image.load(img).convert_alpha()
+                    speaker_img = pygame.transform.scale(speaker_img, speaker_rect.size)
 
             header_render = header_font.render(header, True, (255, 220, 100))
             text_render = font.render(text[:int(len(text)*text_progress)], True, (255, 255, 255))
@@ -131,6 +135,7 @@ def dispStory(story_path):
             text_surf.blit(text_render, (20, 55))
         
         screen.fill((64, 64, 64))
+        screen.blit(speaker_img, speaker_rect) 
         screen.blit(text_surf, (WIDTH*0.05, HEIGHT*0.65))
 
         if options_available:

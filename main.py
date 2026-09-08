@@ -78,7 +78,7 @@ if isPlaying:
     Player.GainTool(battle.GetItem("T04"))
     Player.GainTool(battle.GetItem("T13"))
 
-    img, colour, enemies = battle.SetUpBattle("Street", 7)       
-    battle.StartBattle("Test", Player, enemies)
+    Name, colour, img, desc, enemies = battle.SetUpBattle("S03", 13)       
+    battle.StartBattle(Name, img, colour, Player, enemies)
 
 sys.exit()

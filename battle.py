@@ -84,7 +84,7 @@ def GetEnemy(enemyID):
             enemy, lootpool = enemy.strip().split('$')
             enemy = enemy.split('|')
             if enemy[0] == enemyID:
-                Name, desc, species = enemy[1].strip(), enemy[10], enemy[2]
+                Name, species, img, desc = enemy[1].strip(), enemy[2], enemy[10], enemy[11]
                 stats = []
                 for i in range(4,10):
                     if '~' in enemy[i]:
@@ -93,9 +93,9 @@ def GetEnemy(enemyID):
                     else:
                         stats.append(int(enemy[i]))
 
-                if len(enemy) > 11:
+                if len(enemy) > 12:
                     items = []
-                    for thing in enemy[11:]:
+                    for thing in enemy[12:]:
                         if thing:
                             itemID, probability = thing.split(',')
                             if randint(1,100) <= int(probability):
@@ -109,7 +109,7 @@ def GetEnemy(enemyID):
                     if randint(1,100) <= int(probability):
                         loot.append(GetItem(itemID))
 
-                Enemy = models.Enemy(Name = Name, hp = stats[0], ep = stats[1], df = stats[2], atk = stats[3], lk = stats[4], desc = desc, xp = stats[5], loot = loot, species = species)
+                Enemy = models.Enemy(Name = Name, hp = stats[0], ep = stats[1], df = stats[2], atk = stats[3], lk = stats[4], desc = desc, xp = stats[5], loot = loot, species = species, img = img)
 
                 for item in items:
                     if item.type == models.ITEM:
@@ -122,36 +122,52 @@ def GetEnemy(enemyID):
 
                 
 
-def SetUpBattle(eventName, threat):
+def SetUpBattle(SceneID, threat):
     '''returns img, rgb colour, list of enemy objects'''
     with open("text/scenes.txt", 'r') as file:
-        for scene in file:
+        for scene in [x for x in file if x[0] != '#']:
+            filler = None
+            if '+' in scene:
+                scene, filler = scene.strip().split('+')
+                filler = filler.strip().split('|')
             scene = scene.strip().split('|')
-            if scene[0].lower() == eventName.lower():
-                img, colour, bossID = scene[1], colours[scene[2]], scene[3]
-                enemiesID = scene[4:]
+            if scene[0].lower() == SceneID.lower():
+                Name, colour, img, desc = scene[1], colours[scene[2]], scene[3], scene[4]
+                enemiesID = scene[5:]
                 enemies = []
-                #add boss first
-                if bossID:
-                    threat -= GetThreat(bossID)
-                    enemies.append(GetEnemy(bossID))
 
-                #add supports
-                weights = []
-                for enemyID in enemiesID:
-                    weights.append(GetThreat(enemyID))
-                while threat > 0:
-                    choice = choices(enemiesID, weights)[0]
-                    enemy_threat = GetThreat(choice)
-                    if enemy_threat <= threat:
-                        enemies.append(GetEnemy(choice))
-                        threat -= enemy_threat
+                if filler: #add default enemies, then fill the rest with the filler
+                    for enemyID in enemiesID:
+                        enemies.append(GetEnemy(enemyID))
+                        threat -= GetThreat(enemyID)
 
-    return img, colour, enemies
+                    #add supports
+                    weights = []
+                    for enemyID in filler:
+                        weights.append(GetThreat(enemyID))
+                    while threat > 0 and len(enemies) < 5:
+                        choice = choices(filler, weights)[0]
+                        enemy_threat = GetThreat(choice)
+                        if enemy_threat <= threat:
+                            enemies.append(GetEnemy(choice))
+                            threat -= enemy_threat
 
-def StartBattle(scene, player, enemies):
+                else: #rolls enemies
+                    weights = []
+                    for enemyID in enemiesID:
+                        weights.append(GetThreat(enemyID))
+                    while threat > 0 and len(enemies) < 5:
+                        choice = choices(enemiesID, weights)[0]
+                        enemy_threat = GetThreat(choice)
+                        if enemy_threat <= threat:
+                            enemies.append(GetEnemy(choice))
+                            threat -= enemy_threat
+
+    return Name, colour, img, desc, enemies
+
+def StartBattle(title, img, bg_colour, player, enemies):
     '''Starts a Battle.
-    Scene should be scene object, player should be entity object, enemies should be list of entity objects'''
+    title should be title, img should be bg img, player should be entity object, enemies should be list of entity objects'''
 
     announcements = ["It's your turn."]
 
@@ -166,7 +182,10 @@ def StartBattle(scene, player, enemies):
     header_font = pygame.font.SysFont("Courier New", 24, bold = True)
 
     ### set up scene (backgrounds, sounds)
-    pygame.display.set_caption(scene)
+    pygame.display.set_caption(title)
+    bg_img = pygame.image.load(img).convert_alpha()
+    bg_img = pygame.transform.scale(bg_img, screen.get_rect().size)
+    screen.blit(bg_img, (0,0))  
 
     #set up UI
     info_surf = pygame.Surface((300, 200), pygame.SRCALPHA)
@@ -315,11 +334,11 @@ def StartBattle(scene, player, enemies):
                                     announcements.append(f"The {enemy[2].Name} took {recv_damage} damage.")
                                 battleMode = 3
                                 turnOrder.append(turnOrder.pop(0))
-                            else:
-                                announcements.append(enemy[2].desc)
+                            else: #inspect enemy
+                                desc = enemy[2].desc.split(r'\n')
+                                for line in desc:
+                                    announcements.append(line)
                                 pass
-                    
-                    ### DETECT IF MENU KEYS ARE PRESSED
 
         #check if enemies are dead
         for enemy in enemies:
@@ -338,10 +357,23 @@ def StartBattle(scene, player, enemies):
                 enemies.remove(enemy)
                 
 
-        #draw in the order enemy > text > bottomline > infotext
-        screen.fill((64,64,64))
+        #draw in the order bg > enemy > tint > text > bottomline > infotext
+        screen.blit(bg_img, (0,0))
         for enemy in enemies:
-            pygame.draw.rect(screen, (255, 0, 0), enemy[1])
+            if enemy[2].img:
+                enemy_img = pygame.image.load(enemy[2].img).convert_alpha()
+                enemy_img = pygame.transform.scale(enemy_img, enemy[1].size)
+                screen.blit(enemy_img, enemy[1])  
+                
+            else:
+                pygame.draw.rect(screen, (255, 0, 0), enemy[1])
+
+        #tint screen
+        tint_surf = screen.copy()
+        tint_surf.fill(bg_colour)
+        tint_surf.set_alpha(64)
+        screen.blit(tint_surf, (0,0))
+
 
         text_surf.fill((0,0,0,100))
 

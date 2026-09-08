@@ -295,11 +295,12 @@ class Entity():
         return self.hp <= 0
 
 class Enemy(Entity):
-    def __init__(self, Name = "Enemy", hp = 20, hp_max = None, ep = 10, ep_max = None, df = 2, atk = 5, lk = 5, cc = None, cf = None, dc = None, df_pw = None,desc = "", xp = 5, loot = [], species = 'H'):
+    def __init__(self, Name = "Enemy", hp = 20, hp_max = None, ep = 10, ep_max = None, df = 2, atk = 5, lk = 5, cc = None, cf = None, dc = None, df_pw = None,desc = "", xp = 5, loot = [], species = 'H', img = None):
         super().__init__(Name, hp, hp_max, ep, ep_max, df, atk, lk, cc, cf, dc, df_pw)
         self.desc = desc
         self.xp = xp
         self.loot = loot
+        self.img = img
 
         ###BATTLE LOGIC###
         self.species = species

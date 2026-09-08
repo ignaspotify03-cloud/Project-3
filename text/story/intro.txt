@@ -1,4 +1,4 @@
-||"Ring... Ring... Ring..."
+pics/Posse.png||"Ring... Ring... Ring..."
 |You|"Ugh... I swear I just had the weirdest dream..."
 |You|"...whatever, no time to think about that, I should get to work."
 #lines starting with $ are options. $ text is displayed at the bottom, and is followed by options 1,2,3 starting with 1|2|3|, with an extra field for the results.
